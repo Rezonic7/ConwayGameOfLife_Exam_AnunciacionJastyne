@@ -35,7 +35,6 @@ public class InstantiateCells : MonoBehaviour
                 _nextCells[ci, ri] = new CellClass(false);
             }
         }
-        Debug.Log("test");
         cellGraphics = GetComponent<CellGraphics>();
 
         InitalizeMatrix();
