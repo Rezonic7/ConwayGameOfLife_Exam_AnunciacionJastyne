@@ -2,23 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(InstantiateCells))]
 public class InputManager : MonoBehaviour
 {
     private bool continousNextGeneration = false;
 
-    private IInput Iinput;
+    private IInputReciever iInputReciever;
+
+    private IHoverable currentlyHovering = null;
+
+    [SerializeField] private KeyCode NextButtonOnce = KeyCode.Space;
+    [SerializeField] private KeyCode ContiniusButton = KeyCode.P;
+
+
     private void Awake()
     {
-        Iinput = GetComponent<IInput>();
+        foreach (GameObject gameObjects in FindObjectsOfType<GameObject>())
+        {
+            if (gameObjects.GetComponent<IInputReciever>() != null)
+                iInputReciever = gameObjects.GetComponent<IInputReciever>();
+        }
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        KeyboardInputs();
+
+        MouseInputs();
+    }
+
+    private void KeyboardInputs()
+    {
+        if (Input.GetKeyDown(NextButtonOnce))
         {
-            Iinput.OnNextGeneration();
+            iInputReciever.InputRecieved();
         }
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(ContiniusButton))
         {
             if (continousNextGeneration)
             {
@@ -31,15 +48,59 @@ public class InputManager : MonoBehaviour
                 continousNextGeneration = true;
             }
         }
-        if (!continousNextGeneration && Input.GetMouseButtonDown(0))
+    }
+    private void MouseInputs()
+    {
+        if (GetNearestGameObject() != null)
         {
-            Iinput.OnSwitchState();
+            if (!continousNextGeneration && Input.GetMouseButtonDown(0))
+            {
+                var clickable = GetNearestGameObject().GetComponent<IClickable>();
+                if (clickable != null)
+                {
+                    clickable.Click();
+                }
+            }
+
+            var hoverable = GetNearestGameObject().GetComponent<IHoverable>();
+
+            if (hoverable != null)
+            {
+                if (currentlyHovering == null)
+                {
+                    currentlyHovering = hoverable;
+                    currentlyHovering.Hover();
+                }
+
+                if (currentlyHovering != hoverable)
+                {
+                    currentlyHovering.Unhover();
+                    currentlyHovering = hoverable;
+                    currentlyHovering.Hover();
+                }
+            }
         }
     }
 
+    public GameObject GetNearestGameObject()
+    {
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        foreach (GameObject gameObjects in FindObjectsOfType<GameObject>())
+        {
+            if (Vector2.Distance(gameObjects.transform.position, mousePos) <= 0.5f)
+            {
+                return gameObjects;
+            }
+        }
+        
+        return null;
+    }
+
+
     IEnumerator Play()
     {
-        Iinput.OnNextGeneration();
+        iInputReciever.InputRecieved();
         yield return new WaitForSeconds(0.1f);
         StartCoroutine(Play());
     }
