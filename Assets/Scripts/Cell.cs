@@ -75,17 +75,23 @@ public class Cell : MonoBehaviour, IClickable, IHoverable
 
     public void Click()
     {
-        if(!iCellMatrixManager.IsContinousGeneration())
+        if(!iCellMatrixManager.IsPaused())
         {
-            SwitchState(this);
+            if (!iCellMatrixManager.IsContinousGeneration())
+            {
+                SwitchState(this);
+            }
         }
     }
 
     public void Hover()
     {
-        if (!iCellMatrixManager.IsContinousGeneration())
+        if (!iCellMatrixManager.IsPaused())
         {
-            SetColor(Color.gray);
+            if (!iCellMatrixManager.IsContinousGeneration() || !iCellMatrixManager.IsPaused())
+            {
+                SetColor(Color.gray);
+            }
         }
     }
 

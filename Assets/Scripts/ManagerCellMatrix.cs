@@ -18,6 +18,7 @@ public class ManagerCellMatrix : MonoBehaviour, IManagerCellMatrix, IInteractabl
     private Color deadColor;
 
     private bool continousNextGeneration;
+    public bool isPaused;
 
     private Cell[,] currentGenerationCells;
 
@@ -251,5 +252,20 @@ public class ManagerCellMatrix : MonoBehaviour, IManagerCellMatrix, IInteractabl
     public bool IsContinousGeneration()
     {
         return continousNextGeneration;
+    }
+    public bool IsPaused()
+    {
+        return isPaused;
+    }
+    public void Pause()
+    {
+        if (isPaused)
+        {
+            isPaused = false;
+        }
+        else
+        {
+            isPaused = true;
+        }
     }
 }
