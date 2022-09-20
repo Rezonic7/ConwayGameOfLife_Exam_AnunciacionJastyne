@@ -1,14 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
-
-public class UIManger : MonoBehaviour, IUI
+[RequireComponent(typeof(ManagerCellMatrix))]
+public class UICellMatrix : MonoBehaviour, IUICellMatrix
 {
-    public Text generationText;
-    public int currentGeneration;
-
-    public Text cellsAliveText;
+    [SerializeField] private Text generationText;
+    [SerializeField] private Text cellsAliveText;
 
     public void UpdateCurrentGenerationText(int currentGeneration)
     {
@@ -18,4 +15,5 @@ public class UIManger : MonoBehaviour, IUI
     {
         cellsAliveText.text = "Currently Alive Cells: " + currentAliveCells;
     }
+
 }

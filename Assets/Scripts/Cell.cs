@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour, IClickable, IHoverable
 {
-    private ICallableCellMatrix callCellMatrix;
+    private IManagerCellMatrix iCellMatrixManager;
 
     private CellClass _cellClass = new CellClass(false);
     private SpriteRenderer _cellSprite;
 
-    public CellClass CellClass { get { return _cellClass; } set { _cellClass = value; } }
+    private Color changeableAliveColor;
+    private Color changeableDeadColor;
+
+    public CellClass CellClass { get { return _cellClass; } }
     public SpriteRenderer CellSprite { get { return _cellSprite; } }
+
+    
 
     private void Awake()
     {
@@ -18,9 +23,16 @@ public class Cell : MonoBehaviour, IClickable, IHoverable
 
         foreach (GameObject gameObjects in FindObjectsOfType<GameObject>())
         {
-            if (gameObjects.GetComponent<ICallableCellMatrix>() != null)
-                callCellMatrix = gameObjects.GetComponent<ICallableCellMatrix>();
+            if (gameObjects.GetComponent<IManagerCellMatrix>() != null)
+                if(gameObjects.GetComponent<ManagerCellMatrix>() != null)
+                    iCellMatrixManager = gameObjects.GetComponent<IManagerCellMatrix>();
         }
+    }
+
+    public void ChangeStateColors(Color aliveColor, Color deadColor)
+    {
+        changeableAliveColor = aliveColor;
+        changeableDeadColor = deadColor;
     }
 
     public void SwitchState(Cell cellToSwitch)
@@ -28,41 +40,53 @@ public class Cell : MonoBehaviour, IClickable, IHoverable
         if (cellToSwitch._cellClass.Alive)
         {
             cellToSwitch._cellClass.Alive = false;
+            iCellMatrixManager.IncrementAliveCells(-1);
         }
         else
         {
             cellToSwitch._cellClass.Alive = true;
+            iCellMatrixManager.IncrementAliveCells(1);
         }
         ChangeColorDependingOnState();
 
-        callCellMatrix.ChangeState(cellToSwitch);
+        iCellMatrixManager.UpdateCell(this);
     }
 
     public void ChangeColorDependingOnState()
     {
+        
         if (_cellClass.Alive)
         {
-            ChangeColor(Color.white);
+            SetColor(changeableAliveColor);
         }
         else
         {
-            ChangeColor(Color.black);
+            SetColor(changeableDeadColor);
         }
     }
 
-    public void ChangeColor(Color changedColor)
+    public void SetColor(Color changedColor)
     {
-        CellSprite.color = changedColor;
+        if (this.gameObject != null)
+        {
+            CellSprite.color = changedColor;
+        }
     }
 
     public void Click()
     {
-        SwitchState(this);
+        if(!iCellMatrixManager.IsContinousGeneration())
+        {
+            SwitchState(this);
+        }
     }
 
     public void Hover()
     {
-        ChangeColor(Color.gray);
+        if (!iCellMatrixManager.IsContinousGeneration())
+        {
+            SetColor(Color.gray);
+        }
     }
 
     public void Unhover()

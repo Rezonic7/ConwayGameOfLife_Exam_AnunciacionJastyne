@@ -2,14 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AutoResizeCamera : MonoBehaviour
+public class AutoResizeCamera : MonoBehaviour, IResizeCamera
 {
-    private InstantiateCellMatrix instantiatedCells;
-
+    private Camera thisCamera;
     private void Awake()
     {
-        instantiatedCells = GetComponent<InstantiateCellMatrix>();
-        Camera.main.orthographicSize = (float)instantiatedCells.Rows / 2;
-        Camera.main.transform.position = new Vector3(((float)instantiatedCells.Columns / 2) - 1, ((float)-instantiatedCells.Rows / 2) + 0.5f, -10);
+        thisCamera = GetComponent<Camera>();
+    }
+    public void ResizeCamera(int x, int y)
+    {
+        float bounds = ((float)y / 2);
+
+        thisCamera.orthographicSize = bounds + (bounds * 0.4f);
+        thisCamera.transform.position = new Vector3(((float)x / 2) - 0.5f, ((float)-y / 2) + 0.5f, -10);
     }
 }

@@ -2,24 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputManager : MonoBehaviour
+public class ManagerInput : MonoBehaviour
 {
-    private bool continousNextGeneration = false;
-
-    private IInputReciever iInputReciever;
+    private IInteractable iInteractable;
 
     private IHoverable currentlyHovering = null;
 
     [SerializeField] private KeyCode NextButtonOnce = KeyCode.Space;
-    [SerializeField] private KeyCode ContiniusButton = KeyCode.P;
-
+    [SerializeField] private KeyCode ContinousButton = KeyCode.P;
+    [SerializeField] private KeyCode RestartButton = KeyCode.R;
 
     private void Awake()
     {
         foreach (GameObject gameObjects in FindObjectsOfType<GameObject>())
         {
-            if (gameObjects.GetComponent<IInputReciever>() != null)
-                iInputReciever = gameObjects.GetComponent<IInputReciever>();
+            if (gameObjects.GetComponent<IInteractable>() != null)
+                iInteractable = gameObjects.GetComponent<IInteractable>();
         }
     }
     void Update()
@@ -33,35 +31,21 @@ public class InputManager : MonoBehaviour
     {
         if (Input.GetKeyDown(NextButtonOnce))
         {
-            iInputReciever.InputRecieved();
+            iInteractable.Interaction("Interact1");
         }
-        if (Input.GetKeyDown(ContiniusButton))
+        if (Input.GetKeyDown(ContinousButton))
         {
-            if (continousNextGeneration)
-            {
-                StopAllCoroutines();
-                continousNextGeneration = false;
-            }
-            else
-            {
-                StartCoroutine(Play());
-                continousNextGeneration = true;
-            }
+            iInteractable.Interaction("Interact2");
+        }
+        if (Input.GetKeyDown(RestartButton))
+        {
+            iInteractable.Interaction("Interact3");
         }
     }
     private void MouseInputs()
     {
         if (GetNearestGameObject() != null)
         {
-            if (!continousNextGeneration && Input.GetMouseButtonDown(0))
-            {
-                var clickable = GetNearestGameObject().GetComponent<IClickable>();
-                if (clickable != null)
-                {
-                    clickable.Click();
-                }
-            }
-
             var hoverable = GetNearestGameObject().GetComponent<IHoverable>();
 
             if (hoverable != null)
@@ -77,6 +61,15 @@ public class InputManager : MonoBehaviour
                     currentlyHovering.Unhover();
                     currentlyHovering = hoverable;
                     currentlyHovering.Hover();
+                }
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                var clickable = GetNearestGameObject().GetComponent<IClickable>();
+                if (clickable != null)
+                {
+                    clickable.Click();
                 }
             }
         }
@@ -95,13 +88,5 @@ public class InputManager : MonoBehaviour
         }
         
         return null;
-    }
-
-
-    IEnumerator Play()
-    {
-        iInputReciever.InputRecieved();
-        yield return new WaitForSeconds(0.1f);
-        StartCoroutine(Play());
     }
 }
